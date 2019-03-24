@@ -10,12 +10,12 @@ import retrofit2.http.GET;
 import retrofit2.http.QueryMap;
 
 /**
- * Curiosity API Service
+ * Custom Google Search API Service
  */
 public interface APIService {
 
 
-    @GET("plans/")
+    @GET("customsearch/v1")
     Single<List<SearchItem>> getSearchResults(@QueryMap Map<String, String> params);
 
 }

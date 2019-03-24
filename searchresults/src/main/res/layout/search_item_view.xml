@@ -11,17 +11,35 @@
         android:layout_height="60dp"
         android:layout_centerInParent="true"
         android:layout_gravity="center"
-        android:background="@android:color/darker_gray"
+        android:background="@android:color/white"
         app:cardCornerRadius="5dp">
 
-        <TextView
-            android:id="@+id/search_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            tools:text="Search Item" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/search_title_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                tools:text="Search Item" />
+
+            <TextView
+                android:id="@+id/search_desc_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="14sp"
+                tools:text="Search Description" />
+
+
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
 </RelativeLayout>

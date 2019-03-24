@@ -1,35 +1,52 @@
 package com.thunderhead.searchresults.datasources
 
+import android.content.Context
 import androidx.lifecycle.MutableLiveData
 import androidx.paging.PageKeyedDataSource
+import com.thunderhead.searchresults.R
 import com.thunderhead.searchresults.builders.SearchParamsBuilder
 import com.thunderhead.searchresults.core.APIService
+import com.thunderhead.searchresults.core.SearchResults.Companion.DEFAULT_PAGE_SIZE
 import com.thunderhead.searchresults.models.SearchItem
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-class SearchDataSource(private val service: APIService?, private val queryString: String, private val disposable: CompositeDisposable) : PageKeyedDataSource<Int, SearchItem>() {
+class SearchDataSource(mContext: Context,
+                       private val service: APIService?,
+                       private val queryString: String,
+                       private val disposable: CompositeDisposable) : PageKeyedDataSource<Int, SearchItem>() {
+
     private val requestFailureLiveData: MutableLiveData<*>
-    private var pageLimit = 1
+    private val searchApiKey = mContext.resources.getString(R.string.custom_search_key)
+    private val searchCX = mContext.resources.getString(R.string.custom_search_cx)
+    private var pageLimit: Int = DEFAULT_PAGE_SIZE
 
     init {
         this.requestFailureLiveData = MutableLiveData<Any>()
     }
 
+    private fun getSearchParams(nextPageIndex: Int = 0): Map<String, String> {
+        val searchParamsBuilder = SearchParamsBuilder()
+                .addMaxResults(pageLimit)
+                .addQuery(queryString).addAPIKey(searchApiKey)
+                .addCX(searchCX)
+        if (nextPageIndex > 0) {
+            searchParamsBuilder.addNextPageIndex(nextPageIndex)
+        }
+        return searchParamsBuilder.toParams()
+    }
 
     override fun loadInitial(params: PageKeyedDataSource.LoadInitialParams<Int>, callback: PageKeyedDataSource.LoadInitialCallback<Int, SearchItem>) {
         pageLimit = params.requestedLoadSize
-        val searchParamsBuilder = SearchParamsBuilder()
-                .addLimit(pageLimit)
-                .addTerm(queryString)
+
         service?.let { apiService ->
-            this.disposable.add(apiService.getSearchResults(searchParamsBuilder.toParams())
+            this.disposable.add(apiService.getSearchResults(getSearchParams())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({ searchItems ->
                         callback.onResult(
-                                searchItems, 0, searchItems.size, null, 2
+                                searchItems, 0, searchItems.size, null, searchItems.size + 1
                         )
                     }, {
                         this.handleError(it)
@@ -45,18 +62,14 @@ class SearchDataSource(private val service: APIService?, private val queryString
     override fun loadAfter(params: PageKeyedDataSource.LoadParams<Int>, callback: PageKeyedDataSource.LoadCallback<Int, SearchItem>) {
 
         val page = params.key
-
-        val searchParamsBuilder = SearchParamsBuilder()
-                .addLimit(pageLimit)
-                .addTerm(queryString)
         service?.let { apiService ->
-            this.disposable.add(apiService.getSearchResults(searchParamsBuilder.toParams())
+            this.disposable.add(apiService.getSearchResults(getSearchParams(page))
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe({ searchItems ->
                         callback.onResult(
                                 searchItems,
-                                page + 1
+                                page + searchItems.size + 1
                         )
                     }, {
                         this.handleError(it)

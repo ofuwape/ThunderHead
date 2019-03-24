@@ -6,11 +6,11 @@ import com.thunderhead.searchresults.models.SearchItem
 class SearchItemDiffCallback : DiffUtil.ItemCallback<SearchItem>() {
 
     override fun areItemsTheSame(var1: SearchItem, var2: SearchItem): Boolean {
-        return var1.text == var2.text
+        return var1.cacheId == var2.cacheId
     }
 
     override fun areContentsTheSame(var1: SearchItem, var2: SearchItem): Boolean {
-        return var1.text == var2.text
+        return var1.cacheId == var2.cacheId
     }
 
 }

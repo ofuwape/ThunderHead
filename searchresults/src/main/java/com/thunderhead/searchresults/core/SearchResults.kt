@@ -13,6 +13,7 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.RecyclerView
 import butterknife.BindView
 import butterknife.ButterKnife
+import com.thunderhead.searchresults.R
 import com.thunderhead.searchresults.R2
 import com.thunderhead.searchresults.adapters.SearchItemsAdapter
 import com.thunderhead.searchresults.models.SearchItem
@@ -22,7 +23,7 @@ import javax.inject.Inject
 
 
 class SearchResults @JvmOverloads
-constructor(private var mContext: Context, var attrs: AttributeSet? = null)
+constructor(private var mContext: Context, private var attrs: AttributeSet? = null)
     : FrameLayout(mContext, attrs), LifecycleOwner {
 
     private var lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
@@ -35,7 +36,7 @@ constructor(private var mContext: Context, var attrs: AttributeSet? = null)
     private val mComponent: Component
     private var searchVieModel: SearchResultsViewModel? = null
     private var mainHandler = Handler(context.mainLooper)
-    private var maxResults: Int = 12
+    private var maxResults: Int = DEFAULT_PAGE_SIZE
 
     @Inject
     fun setConstructorParams(mAPI: APIService) {
@@ -59,13 +60,14 @@ constructor(private var mContext: Context, var attrs: AttributeSet? = null)
     }
 
     private fun retrieveMaxResults() {
-        maxResults = (attrs?.getAttributeIntValue("http://schemas.android.com/apk/res-auto",
-                "max_search_results", 12)) ?: 12
+        maxResults = (attrs?.getAttributeIntValue(mContext.getString(R.string.attribute_namespace),
+                mContext.getString(R.string.max_result_key), DEFAULT_PAGE_SIZE))
+                ?: DEFAULT_PAGE_SIZE
     }
 
     private fun configureSearchData() {
 
-        searchVieModel = SearchResultsViewModel(mAPI, "Thunderhead ONE",
+        searchVieModel = SearchResultsViewModel(mContext, mAPI, mContext.getString(R.string.search_query),
                 compositeDisposable, maxResults)
 
         val searchItemsAdapter = SearchItemsAdapter(mContext)
@@ -88,6 +90,10 @@ constructor(private var mContext: Context, var attrs: AttributeSet? = null)
 
     override fun getLifecycle(): Lifecycle {
         return lifecycleRegistry
+    }
+
+    companion object {
+        const val DEFAULT_PAGE_SIZE: Int = 12
     }
 
 }

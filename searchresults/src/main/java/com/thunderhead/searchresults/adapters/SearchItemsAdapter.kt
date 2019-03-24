@@ -9,7 +9,7 @@ import com.thunderhead.searchresults.callbacks.SearchItemDiffCallback
 import com.thunderhead.searchresults.holders.SearchItemViewHolder
 import com.thunderhead.searchresults.models.SearchItem
 
-class SearchItemsAdapter(val mContext: Context) : PagedListAdapter<SearchItem,
+class SearchItemsAdapter(private val mContext: Context) : PagedListAdapter<SearchItem,
         SearchItemViewHolder>(SearchItemDiffCallback()) {
 
     override fun onBindViewHolder(searchItemViewHolder: SearchItemViewHolder, position: Int) {

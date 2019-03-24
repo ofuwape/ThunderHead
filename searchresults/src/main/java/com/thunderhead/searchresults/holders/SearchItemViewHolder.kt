@@ -12,11 +12,15 @@ import com.thunderhead.searchresults.models.SearchItem
  */
 class SearchItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    @BindView(R2.id.search_text_view)
-    var searchTextView: TextView? = null
+    @BindView(R2.id.search_title_view)
+    var searchTitleView: TextView? = null
+
+    @BindView(R2.id.search_desc_view)
+    var searchDescriptionView: TextView? = null
 
     fun updateWithItem(searchItem: SearchItem) {
-        searchTextView?.text = searchItem.text
+        searchTitleView?.text = searchItem.title
+        searchDescriptionView?.text = searchItem.description
     }
 
 }

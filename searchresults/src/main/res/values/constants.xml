@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="api_path">https://api.curiositystream.com/v1/</string>
+    <string name="api_path">https://www.googleapis.com/</string>
+    <string name="custom_search_key">AIzaSyAdEuafoCBGJZU3Cmti7AR0ZupQpQ-0HYg</string>
+    <string name="custom_search_cx">013077287520033969836:sg733cxf9bg</string>
 </resources>
