@@ -15,7 +15,7 @@ import retrofit2.http.QueryMap;
 public interface APIService {
 
 
-    @GET("v1/media")
+    @GET("plans/")
     Single<List<SearchItem>> getSearchResults(@QueryMap Map<String, String> params);
 
 }

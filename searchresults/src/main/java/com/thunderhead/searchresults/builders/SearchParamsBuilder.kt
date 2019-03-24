@@ -1,6 +1,6 @@
 package com.thunderhead.searchresults.builders
 
-import java.util.HashMap
+import java.util.*
 
 /**
  * A convenience builder class for creating a params map for searching the Curiosity API.

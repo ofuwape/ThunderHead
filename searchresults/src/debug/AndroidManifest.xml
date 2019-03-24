@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.thunderhead.searchresults">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application android:theme="@style/Theme.AppCompat">
+        <activity android:name=".MockActivity">
+
+        </activity>
+    </application>
+</manifest>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SearchResults">
+        <attr name="max_search_results" format="integer" />
+    </declare-styleable>
+</resources>
