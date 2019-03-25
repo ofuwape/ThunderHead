@@ -14,7 +14,8 @@
         android:layout_centerInParent="true"
         android:layout_gravity="center"
         android:background="@android:color/white"
-        android:minHeight="80dp"
+        android:minHeight="90dp"
+        android:padding="5dp"
         card:cardBackgroundColor="@android:color/white"
         card_view:cardElevation="5sp"
         card_view:cardUseCompatPadding="true">

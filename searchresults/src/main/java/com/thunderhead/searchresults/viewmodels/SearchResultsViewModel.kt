@@ -24,8 +24,8 @@ class SearchResultsViewModel constructor(mContext: Context,
 
     private var searchItemLiveData: LiveData<PagedList<SearchItem>> = MutableLiveData()
     private var config: PagedList.Config = PagedList.Config.Builder()
-            .setPageSize(pageSize)
-            .setInitialLoadSizeHint(pageSize * 2)
+            .setPageSize(pageSize / 2)
+            .setInitialLoadSizeHint(pageSize)
             .setEnablePlaceholders(false)
             .build()
     private var sourceFactory: SearchDataSourceFactory? = null

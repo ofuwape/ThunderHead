@@ -86,6 +86,9 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
         maxResults = (attrs?.getAttributeIntValue(mContext.getString(R.string.attribute_namespace),
                 mContext.getString(R.string.max_result_key), DEFAULT_PAGE_SIZE))
                 ?: DEFAULT_PAGE_SIZE
+        if (maxResults < 1) {
+            maxResults = DEFAULT_PAGE_SIZE
+        }
     }
 
     /**
@@ -152,6 +155,7 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
         progressBar?.visibility = if (networkState?.status == Status.RUNNING) View.VISIBLE else View.GONE
 
         swipeToRefresh?.isEnabled = networkState?.status == Status.SUCCESS
+        swipeToRefresh?.isRefreshing = !(networkState?.status == Status.SUCCESS)
         retryButton?.setOnClickListener { searchVieModel?.retry() }
     }
 

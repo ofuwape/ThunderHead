@@ -38,8 +38,16 @@ class SearchDataSource(private val mContext: Context,
     }
 
     private fun getSearchParams(nextPageIndex: Int = 0): Map<String, String> {
+        var numberOfResultsLeft = pageLimit
+        if (nextPageIndex > 0) {
+            numberOfResultsLeft = if (nextPageIndex < pageLimit && (pageLimit - nextPageIndex) < pageLimit) {
+                pageLimit - nextPageIndex
+            } else {
+                0
+            }
+        }
         val searchParamsBuilder = SearchParamsBuilder()
-                .addMaxResults(pageLimit)
+                .addMaxResults(numberOfResultsLeft)
                 .addQuery(queryString).addAPIKey(searchApiKey)
                 .addCX(searchCX)
         if (nextPageIndex > 0) {
@@ -64,8 +72,7 @@ class SearchDataSource(private val mContext: Context,
                             initialLoad.postValue(NetworkState.LOADED)
                             callback.onResult(
                                     searchItems, 0,
-                                    searchContainer.searchInformation?.totalResults
-                                            ?: DEFAULT_PAGE_SIZE,
+                                    pageLimit,
                                     null, searchItems.size + 1)
                         }
                     }, {
@@ -86,6 +93,9 @@ class SearchDataSource(private val mContext: Context,
     override fun loadAfter(params: PageKeyedDataSource.LoadParams<Int>, callback: PageKeyedDataSource.LoadCallback<Int, SearchItem>) {
 
         val page = params.key
+        if (page > pageLimit) {
+            return
+        }
         networkState.postValue(NetworkState.LOADING)
 
         service?.let { apiService ->
