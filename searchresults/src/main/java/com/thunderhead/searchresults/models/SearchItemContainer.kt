@@ -7,5 +7,8 @@ class SearchItemContainer {
     @SerializedName("items")
     var items: ArrayList<SearchItem>? = null
 
+    @SerializedName("searchInformation")
+    var searchInformation: SearchStats? = null
+
 
 }

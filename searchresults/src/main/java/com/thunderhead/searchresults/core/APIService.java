@@ -1,8 +1,7 @@
 package com.thunderhead.searchresults.core;
 
-import com.thunderhead.searchresults.models.SearchItem;
+import com.thunderhead.searchresults.models.SearchItemContainer;
 
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Single;
@@ -16,6 +15,6 @@ public interface APIService {
 
 
     @GET("customsearch/v1")
-    Single<List<SearchItem>> getSearchResults(@QueryMap Map<String, String> params);
+    Single<SearchItemContainer> getSearchResults(@QueryMap Map<String, String> params);
 
 }

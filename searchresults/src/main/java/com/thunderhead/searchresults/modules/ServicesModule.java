@@ -1,15 +1,16 @@
 package com.thunderhead.searchresults.modules;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.thunderhead.searchresults.BuildConfig;
+import com.thunderhead.searchresults.MainUtil;
 import com.thunderhead.searchresults.R;
 import com.thunderhead.searchresults.core.APIService;
 
 import javax.inject.Singleton;
 
-import androidx.annotation.NonNull;
 import dagger.Module;
 import dagger.Provides;
 import okhttp3.OkHttpClient;
@@ -38,11 +39,6 @@ public final class ServicesModule {
     }
 
 
-    private Request.Builder setUpHeaders(@NonNull Request.Builder requestBuilder) {
-        requestBuilder.addHeader("x-client-version", BuildConfig.VERSION_NAME);
-        return requestBuilder;
-    }
-
     /**
      * Provides new instance of APIService.
      *
@@ -59,10 +55,17 @@ public final class ServicesModule {
                     Request.Builder originalRequestBuilder = original.newBuilder()
                             .header("Accept", "applicaton/json")
                             .method(original.method(), original.body());
+                    if (BuildConfig.DEBUG) {
+                        Log.d("endpoint-->", original.url().toString());
+                    }
                     return chain.proceed(originalRequestBuilder.build());
                 }).build();
 
         String baseUrl = mContext.getResources().getString(R.string.api_path);
+        String mockBaseUrl = MainUtil.Companion.getMockServerUrl();
+        if (mockBaseUrl != null) {
+            baseUrl = mockBaseUrl;
+        }
 
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())

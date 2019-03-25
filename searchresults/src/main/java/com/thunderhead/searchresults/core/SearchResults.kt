@@ -4,19 +4,26 @@ import android.content.Context
 import android.os.Handler
 import android.util.AttributeSet
 import android.view.View
+import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.Observer
 import androidx.paging.PagedList
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import butterknife.BindView
 import butterknife.ButterKnife
 import com.thunderhead.searchresults.R
 import com.thunderhead.searchresults.R2
 import com.thunderhead.searchresults.adapters.SearchItemsAdapter
+import com.thunderhead.searchresults.models.NetworkState
 import com.thunderhead.searchresults.models.SearchItem
+import com.thunderhead.searchresults.models.Status
 import com.thunderhead.searchresults.viewmodels.SearchResultsViewModel
 import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
@@ -31,12 +38,26 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
     @BindView(R2.id.search_recycler_view)
     var searchRecylerView: RecyclerView? = null
 
+    @BindView(R2.id.refresh_layout)
+    var swipeToRefresh: SwipeRefreshLayout? = null
+
+    @BindView(R2.id.retry_button)
+    var retryButton: Button? = null
+
+    @BindView(R2.id.error_message_view)
+    var errorMessageView: TextView? = null
+
+    @BindView(R2.id.progress_bar)
+    var progressBar: ProgressBar? = null
+
     private var mAPI: APIService? = null
     private val compositeDisposable = CompositeDisposable()
     private val mComponent: Component
     private var searchVieModel: SearchResultsViewModel? = null
     private var mainHandler = Handler(context.mainLooper)
     private var maxResults: Int = DEFAULT_PAGE_SIZE
+
+    var searchItemsAdapter: SearchItemsAdapter? = null
 
     @Inject
     fun setConstructorParams(mAPI: APIService) {
@@ -51,12 +72,27 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
         mComponent = Component.Initializer.init(false, mContext)
         mComponent.inject(this)
         ButterKnife.bind(this)
-        if (searchRecylerView == null) {
-            val recyclerView: RecyclerView? = view.findViewById(com.thunderhead.searchresults.R.id.search_recycler_view)
-            searchRecylerView = recyclerView
-        }
+        setUpViews(view)
         retrieveMaxResults()
         configureSearchData()
+    }
+
+    private fun setUpViews(view: View) {
+        if (searchRecylerView == null) {
+            searchRecylerView = view.findViewById(com.thunderhead.searchresults.R.id.search_recycler_view)
+        }
+        if (swipeToRefresh == null) {
+            swipeToRefresh = view.findViewById(com.thunderhead.searchresults.R.id.refresh_layout)
+        }
+        if (retryButton == null) {
+            retryButton = view.findViewById(com.thunderhead.searchresults.R.id.retry_button)
+        }
+        if (errorMessageView == null) {
+            errorMessageView = view.findViewById(com.thunderhead.searchresults.R.id.error_message_view)
+        }
+        if (progressBar == null) {
+            progressBar = view.findViewById(com.thunderhead.searchresults.R.id.progress_bar)
+        }
     }
 
     private fun retrieveMaxResults() {
@@ -65,23 +101,26 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
                 ?: DEFAULT_PAGE_SIZE
     }
 
+    /**
+     * Configures ViewModel, DataSource and Adapter
+     */
     private fun configureSearchData() {
 
         searchVieModel = SearchResultsViewModel(mContext, mAPI, mContext.getString(R.string.search_query),
                 compositeDisposable, maxResults)
-
-        val searchItemsAdapter = SearchItemsAdapter(mContext)
+        searchItemsAdapter = SearchItemsAdapter(mContext)
+        searchRecylerView?.layoutManager = LinearLayoutManager(mContext, RecyclerView.VERTICAL, false)
         searchRecylerView?.adapter = searchItemsAdapter
 
-        //run on main thread
         mainHandler.post {
             searchVieModel?.getSearchItemLiveData()?.observe(this,
                     Observer<PagedList<SearchItem>> { value ->
                         value?.let {
-                            searchItemsAdapter.submitList(value)
+                            searchItemsAdapter?.submitList(value)
                         }
                     })
         }
+        initSwipeToRefresh()
     }
 
     private fun disposeComposable() {
@@ -94,6 +133,37 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
 
     companion object {
         const val DEFAULT_PAGE_SIZE: Int = 12
+    }
+
+    // Handle Server Error UI States
+    private fun initSwipeToRefresh() {
+        searchVieModel?.getRefreshState()?.observe(this, Observer { networkState ->
+            if (searchItemsAdapter?.currentList != null) {
+                if (searchItemsAdapter?.currentList!!.size > 0) {
+                    swipeToRefresh?.isRefreshing = networkState?.status == NetworkState.LOADING.status
+                } else {
+                    setInitialLoadingState(networkState)
+                }
+            } else {
+                setInitialLoadingState(networkState)
+            }
+        })
+        swipeToRefresh?.setOnRefreshListener { searchVieModel?.refresh() }
+    }
+
+    private fun setInitialLoadingState(networkState: NetworkState?) {
+
+        errorMessageView?.visibility = if (networkState?.message != null) View.VISIBLE else View.GONE
+        if (networkState?.message != null) {
+            errorMessageView?.text = networkState.message
+        }
+
+
+        retryButton?.visibility = if (networkState?.status === Status.FAILED) View.VISIBLE else View.GONE
+        progressBar?.visibility = if (networkState?.status == Status.RUNNING) View.VISIBLE else View.GONE
+
+        swipeToRefresh?.isEnabled = networkState?.status == Status.SUCCESS
+        retryButton?.setOnClickListener { searchVieModel?.retry() }
     }
 
 }

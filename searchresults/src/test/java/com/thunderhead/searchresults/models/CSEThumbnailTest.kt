@@ -1,9 +1,8 @@
 package com.thunderhead.searchresults.models
 
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
-
-import org.junit.Assert.*
 
 class CSEThumbnailTest {
 

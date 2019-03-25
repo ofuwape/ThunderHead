@@ -10,7 +10,7 @@ class SearchItemDiffCallback : DiffUtil.ItemCallback<SearchItem>() {
     }
 
     override fun areContentsTheSame(var1: SearchItem, var2: SearchItem): Boolean {
-        return var1.cacheId == var2.cacheId
+        return var1.description == var2.description
     }
 
 }

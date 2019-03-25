@@ -6,6 +6,7 @@
     android:orientation="vertical">
 
     <com.thunderhead.searchresults.core.SearchResults
+        android:id="@+id/my_search_results"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:max_search_results="5" />
