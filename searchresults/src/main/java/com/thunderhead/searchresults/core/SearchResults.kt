@@ -16,10 +16,7 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import butterknife.BindView
-import butterknife.ButterKnife
 import com.thunderhead.searchresults.R
-import com.thunderhead.searchresults.R2
 import com.thunderhead.searchresults.adapters.SearchItemsAdapter
 import com.thunderhead.searchresults.models.NetworkState
 import com.thunderhead.searchresults.models.SearchItem
@@ -35,19 +32,10 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
 
     private var lifecycleRegistry: LifecycleRegistry = LifecycleRegistry(this)
 
-    @BindView(R2.id.search_recycler_view)
     var searchRecylerView: RecyclerView? = null
-
-    @BindView(R2.id.refresh_layout)
     var swipeToRefresh: SwipeRefreshLayout? = null
-
-    @BindView(R2.id.retry_button)
     var retryButton: Button? = null
-
-    @BindView(R2.id.error_message_view)
     var errorMessageView: TextView? = null
-
-    @BindView(R2.id.progress_bar)
     var progressBar: ProgressBar? = null
 
     private var mAPI: APIService? = null
@@ -71,7 +59,6 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
 
         mComponent = Component.Initializer.init(false, mContext)
         mComponent.inject(this)
-        ButterKnife.bind(this)
         setUpViews(view)
         retrieveMaxResults()
         configureSearchData()
@@ -137,17 +124,19 @@ constructor(private var mContext: Context, private var attrs: AttributeSet? = nu
 
     // Handle Server Error UI States
     private fun initSwipeToRefresh() {
-        searchVieModel?.getRefreshState()?.observe(this, Observer { networkState ->
-            if (searchItemsAdapter?.currentList != null) {
-                if (searchItemsAdapter?.currentList!!.size > 0) {
-                    swipeToRefresh?.isRefreshing = networkState?.status == NetworkState.LOADING.status
+        mainHandler.post {
+            searchVieModel?.getRefreshState()?.observe(this, Observer { networkState ->
+                if (searchItemsAdapter?.currentList != null) {
+                    if (searchItemsAdapter?.currentList!!.size > 0) {
+                        swipeToRefresh?.isRefreshing = networkState?.status == NetworkState.LOADING.status
+                    } else {
+                        setInitialLoadingState(networkState)
+                    }
                 } else {
                     setInitialLoadingState(networkState)
                 }
-            } else {
-                setInitialLoadingState(networkState)
-            }
-        })
+            })
+        }
         swipeToRefresh?.setOnRefreshListener { searchVieModel?.refresh() }
     }
 
