@@ -1,1 +1,1 @@
-include ':app', ':searchresults'
+include ':searchresults'
